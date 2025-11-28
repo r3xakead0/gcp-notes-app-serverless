@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notas - Demo GCP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>📒 Mis Notas</h1>
+
+  <section class="form-section">
+    <h2 id="form-title">Crear nota</h2>
+    <form id="note-form">
+      <!-- Campo oculto para el ID al editar -->
+      <input type="hidden" id="note-id" />
+
+      <label for="note-title">
+        Título:
+        <input type="text" id="note-title" required />
+      </label>
+
+      <label for="note-detail">
+        Detalle:
+        <textarea id="note-detail" rows="4"></textarea>
+      </label>
+
+      <div class="buttons">
+        <button type="submit" id="save-btn">Guardar</button>
+        <button type="button" id="cancel-btn">Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="list-section">
+    <h2>Listado de notas</h2>
+    <table id="notes-table">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Creada</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="notes-tbody">
+        <!-- Filas dinámicas -->
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <small>Sistema de notas con Firestore + Cloud Functions + Cloud Storage</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

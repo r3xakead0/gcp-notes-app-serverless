@@ -1,92 +1,85 @@
-# Generar Diagrama de Arquitectura en GCP usando Python Diagrams
+# Generate Architecture Diagram in GCP using Python Diagrams
 
-ste documento explica cómo instalar correctamente Diagrams (sin errores como typed-ast) y cómo generar un diagrama de arquitectura usando el script gcp_notes_architecture.py.
+This document explains how to correctly install **Diagrams** and how to generate an architecture diagram using the `gcp_notes_architecture.py` script.
 
-El diagrama muestra:
-- Frontend estático en Cloud Storage
-- API Serverless en Cloud Functions
-- Base de datos Firestore
-- Usuario accediendo desde navegador
+The diagram shows:
+- Static frontend in Cloud Storage
+- Serverless API in Cloud Functions
+- Firestore database
+- User accessing from a web browser
 
+## 📦 1. Requirements
 
-## 📦 1. Requisitos
-
-Necesitas:
+You need:
 - Python 3.8+
-- pip actualizado
-- Graphviz instalado en tu sistema
+- Updated pip
+- Graphviz installed on your system
 
-Instalar Graphviz en tu sistema
+Install Graphviz depending on your OS:
 
-Dependiendo de tu SO:
-
-Ubuntu / Debian
-
-``` bash
+### Ubuntu / Debian
+```bash
 sudo apt-get update
 sudo apt-get install graphviz
 ```
 
-macOS (Homebrew)
-
-``` bash
+### macOS (Homebrew)
+```bash
 brew install graphviz
 ```
 
-Windows
-1. Descarga Graphviz desde: https://graphviz.org/download/
-2. Instálalo
-3. Agrega la carpeta bin/ al PATH
+### Windows
+1. Download Graphviz from: https://graphviz.org/download/
+2. Install it
+3. Add the **bin/** folder to your PATH
 
+## 🧪 2. Create a virtual environment (recommended)
 
-## 🧪 2. Crear entorno virtual (recomendado)
-
-``` bash
+```bash
 python -m venv venv-diagrams
-source venv-diagrams/bin/activate       # En Windows: venv-diagrams\Scripts\activate
+source venv-diagrams/bin/activate       # On Windows: venv-diagrams\Scripts\activate
 pip install --upgrade pip
 ```
 
-## 📥 3. Instalar librerías necesarias
+## 📥 3. Install required libraries
 
-Instala Graphviz y Jinja2:
+Install Graphviz and Jinja2:
 
-``` bash
+```bash
 pip install graphviz==0.20.1 jinja2==3.1.3
 ```
 
-Ahora instala Diagrams sin dependencias automáticas:
+Now install Diagrams:
 
-``` bash
+```bash
 pip install diagrams==0.23.3
 ```
 
-## ▶️ 4. Generar el diagrama
+## ▶️ 4. Generate the diagram
 
-Ejecuta:
+Run:
 
-``` bash
+```bash
 python gcp_notes_architecture.py
 ```
 
-Esto genera un archivo en la carpeta actual:
+This generates a file in the current directory:
 
-``` bash
+```bash
 gcp-notes-architecture.png
 ```
 
+## 🎉 5. Result
 
-## 🎉 5. Resultado
+You will obtain a visual diagram showing:
+- User → Internet → Cloud Storage  
+- Frontend → Cloud Function  
+- Cloud Function → Firestore  
 
-Obtendrás un diagrama visual que muestra:
-	•	Usuario → Internet → Cloud Storage
-	•	Frontend → Cloud Function
-	•	Cloud Function → Firestore
+## 🛠️ 6. Deactivate the virtual environment (recommended)
 
-## 🛠️ 7. Desactivar entorno virtual (recomendado)
+Exit the virtual environment:
 
-Salir del entorno virtual:
-
-``` bash
+```bash
 deactivate
 ```

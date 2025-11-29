@@ -1,0 +1,57 @@
+name: Deploy backend and frontend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  FUNCTION_NAME: notes_api
+  BUCKET_NAME: ${{ secrets.GCP_PROJECT_ID }}-notas-web
+  BACKEND_DIR: notes-backend
+  FRONTEND_DIR: notes-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Deploy Cloud Function (backend)
+        run: |
+          gcloud functions deploy "$FUNCTION_NAME" \
+            --gen2 \
+            --runtime=python311 \
+            --region="$REGION" \
+            --source="$BACKEND_DIR" \
+            --entry-point=notes_api \
+            --trigger-http \
+            --allow-unauthenticated
+
+      - name: Prepare frontend bucket
+        run: |
+          gsutil ls -b "gs://$BUCKET_NAME" || gsutil mb -l "$REGION" "gs://$BUCKET_NAME"
+          gsutil iam ch allUsers:objectViewer "gs://$BUCKET_NAME"
+          gsutil web set -m index.html -e index.html "gs://$BUCKET_NAME"
+
+      - name: Deploy frontend assets
+        run: |
+          gsutil -m rsync -r "$FRONTEND_DIR" "gs://$BUCKET_NAME"

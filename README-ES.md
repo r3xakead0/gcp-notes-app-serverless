@@ -1,41 +1,41 @@
-# Notes System - Complete Guide with Cloud Functions, Firestore, and Cloud Storage
+# Sistema de Notas - Guía Completa con Cloud Functions, Firestore y Cloud Storage
 
-This project implements a simple notes system using Google Cloud serverless services: Firestore, Cloud Functions, and a static frontend hosted on Cloud Storage.
+Este proyecto implementa un sistema simple para registrar notas utilizando servicios serverless de Google Cloud: Firestore, Cloud Functions y un frontend estático alojado en Cloud Storage.
 
 ---
 
-## 🧱 General Architecture
+## 🧱 Arquitectura General
 
 ![gcp notes app architecture](diagram/gcp-notes-architecture.png)
 
-**1. NoSQL database:**\
-Firestore in Native mode, collection `notes`.
+**1. Base de datos NoSQL:**\
+Firestore en modo nativo, colección `notes`.
 
-**2. Serverless backend:**\
-Cloud Functions (Python) exposing a mini REST API:
-- `POST /notes` - create note
-- `GET /notes` - list notes
-- `GET /notes/{id}` - get note detail
-- `PUT /notes/{id}` - update note
-- `DELETE /notes/{id}` - delete note
+**2. Backend serverless:**\
+Cloud Functions (Python) exponiendo un mini-API REST: 
+- `POST /notes` - crear nota
+- `GET /notes` - listar notas
+- `GET /notes/{id}` - obtener detalle de nota
+- `PUT /notes/{id}` - actualizar nota
+- `DELETE /notes/{id}` - eliminar nota
 
 **3. Frontend:**\
-Web page (HTML/CSS/JS) hosted as a static site in Cloud Storage.
+Página web (HTML/CSS/JS) alojada como sitio estático en Cloud Storage.
 
 ---
 
-## 🔧 Step 0: Prerequisites
+## 🔧 Paso 0: Prerrequisitos
 
-```bash
+``` bash
 gcloud auth login
 gcloud config set project <PROJECT_ID>
 ```
 
 ---
 
-## 🎯 Step 1: Environment variables
+## 🎯 Paso 1: Variables de entorno
 
-```bash
+``` bash
 export PROJECT_ID="<PROJECT_ID>"
 export REGION="us-central1"
 export BUCKET_NAME="${PROJECT_ID}-notas-web"
@@ -44,9 +44,9 @@ export FUNCTION_NAME="notes_api"
 
 ---
 
-## 📦 Step 2: Enable APIs
+## 📦 Paso 2: Habilitar APIs
 
-```bash
+``` bash
 gcloud services enable \
   firestore.googleapis.com \
   cloudfunctions.googleapis.com \
@@ -55,9 +55,9 @@ gcloud services enable \
 
 ---
 
-## 🗄️ Step 3: Create Firestore (Native Mode)
+## 🗄️ Paso 3: Crear Firestore (Modo Nativo)
 
-```bash
+``` bash
 gcloud firestore databases create \
   --location=$REGION \
   --type=firestore-native
@@ -65,18 +65,18 @@ gcloud firestore databases create \
 
 ---
 
-## 🧠 Step 4: Backend Code (Cloud Function)
+## 🧠 Paso 4: Código del Backend (Cloud Function)
 
-In Cloud Shell
+En Cloud Shell
 
-```bash
+``` bash
 mkdir notes-backend
 cd notes-backend
 ```
 
-Create the file `main.py`
+Crea el archivo `main.py`
 
-```python
+``` python
 import json
 import datetime
 from google.cloud import firestore
@@ -120,7 +120,7 @@ def notes_api(request):
         return (json.dumps({"error": "Not found"}), 404, headers)
 
     try:
-        # GET list or detail
+        # GET lista o detalle
         if method == "GET":
             if is_collection:
                 docs = (
@@ -136,7 +136,7 @@ def notes_api(request):
                     return (json.dumps({"error": "Note not found"}), 404, headers)
                 return (json.dumps(_note_to_dict(doc)), 200, headers)
 
-        # POST create
+        # POST crear
         if method == "POST" and is_collection:
             payload = request.get_json(silent=True)
             if not payload or "title" not in payload:
@@ -154,7 +154,7 @@ def notes_api(request):
 
             return (json.dumps(_note_to_dict(doc_ref.get())), 201, headers)
 
-        # PUT update
+        # PUT actualizar
         if method in ("PUT", "PATCH") and note_id:
             payload = request.get_json(silent=True)
             if not payload:
@@ -175,7 +175,7 @@ def notes_api(request):
             doc_ref.update(updates)
             return (json.dumps(_note_to_dict(doc_ref.get())), 200, headers)
 
-        # DELETE remove
+        # DELETE eliminar
         if method == "DELETE" and note_id:
             doc_ref = db.collection(NOTES_COLLECTION).document(note_id)
             if not doc_ref.get().exists:
@@ -189,19 +189,19 @@ def notes_api(request):
         return (json.dumps({"error": str(e)}), 500, headers)
 ``` 
 
-> Includes functionality: create, list, edit, delete notes + CORS.
+> Incluye funcionalidad: crear, listar, editar, eliminar notas + CORS.
 
-Create the file `requirements.txt`
+Crea el archivo `requirements.txt`
 
-```text
+``` text
 google-cloud-firestore==2.16.0
 ```
 
 ---
 
-## ☁️ Step 5: Deploy Cloud Function
+## ☁️ Paso 5: Desplegar Cloud Function
 
-```bash
+``` bash
 gcloud functions deploy $FUNCTION_NAME \
   --gen2 \
   --runtime=python311 \
@@ -212,9 +212,9 @@ gcloud functions deploy $FUNCTION_NAME \
   --allow-unauthenticated
 ```
 
-Get and store the URL:
+Obtener y guardar la URL:
 
-```bash
+``` bash
 export FUNCTION_URL="$(gcloud functions describe $FUNCTION_NAME \
   --region=$REGION \
   --format='value(serviceConfig.uri)')"
@@ -222,9 +222,9 @@ export FUNCTION_URL="$(gcloud functions describe $FUNCTION_NAME \
 echo "FUNCTION_URL = $FUNCTION_URL"
 ```
 
-Get and store the service account used by the function:
+Obtener y guardar el service account que usa la función:
 
-```bash
+``` bash
 export SA_EMAIL="$(gcloud functions describe $FUNCTION_NAME \
   --gen2 \
   --region=$REGION \
@@ -233,9 +233,9 @@ export SA_EMAIL="$(gcloud functions describe $FUNCTION_NAME \
 echo "SA_EMAIL = $SA_EMAIL"
 ``` 
 
-Grant Firestore permissions to that service account
+Dar permisos de Firestore a ese service account
 
-```bash
+``` bash
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$SA_EMAIL" \
   --role="roles/datastore.user"
@@ -243,63 +243,63 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 
 ---
 
-## 🧪 Step 6: Test the API
+## 🧪 Paso 6: Probar la API
 
-### Create note
+### Crear nota
 
-```bash
+``` bash
 curl -X POST "$FUNCTION_URL/notes" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "First note",
-    "detail": "Hello Firestore"
+    "title": "Primera nota",
+    "detail": "Hola Firestore"
   }'
 ```
 
-### List notes
+### Listar notas
 
-```bash
+``` bash
 curl "$FUNCTION_URL/notes"
 ```
 
-### Get note
+### Obtener nota
 
-```bash
+``` bash
 curl "$FUNCTION_URL/notes/{id}"
 ```
 
-### Edit note
+### Editar nota
 
-```bash
+``` bash
 curl -X PUT "$FUNCTION_URL/notes/kISGMWGfsazN6CIfxqV2" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "First note",
-    "detail": "Hello Firestore + Cloud Functions"
+    "title": "Primera nota",
+    "detail": "Hola Firestore + Cloud Functions"
   }'
 ```
 
-### Delete note
+### Eliminar nota
 
-```bash
+``` bash
 curl -X DELETE "$FUNCTION_URL/notes/{id}" \
   -H "Content-Type: application/json"
 ```
 
 ---
 
-## 🧠 Step 7: Frontend Code (HTML + CSS + JS in Cloud Storage)
+## 🧠 Paso 7: Código del Frontend (HTML + CSS + JS en Cloud Storage)
 
-In Cloud Shell
+En Cloud Shell
 
-```bash
+``` bash
 mkdir notes-frontend
 cd notes-frontend
 ```
 
-Create the file `index.html`
+Crea el archivo `index.html`
 
-```html
+``` html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -359,9 +359,9 @@ Create the file `index.html`
 </html>
 ``` 
 
-Create the file `styles.css`
+Crea el archivo `styles.css`
 
-```css
+``` css
 /* Layout general */
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -547,12 +547,12 @@ footer {
 }
 ``` 
 
-Create the file `app.js`
+Crea el archivo `app.js`
 
-> 👉 Replace API_BASE_URL with your Cloud Function URL.
+> 👉 Cambia API_BASE_URL por la URL real de tu Cloud Function.
 
-```javascript
-// Base URL of the Cloud Function
+``` javascript
+// URL base de la Cloud Function
 const API_BASE_URL = "https://notes-api-cinsoje5sq-uc.a.run.app";
 
 const form = document.getElementById("note-form");
@@ -686,45 +686,45 @@ fetchNotes();
 
 ---
 
-## 🌐 Step 8: Create the website with Cloud Storage
+## 🌐 Paso 8: Crear el sitio web con Cloud Storage
 
-Create bucket:
+Crear bucket:
 
-```bash
+``` bash
 gsutil mb -l $REGION gs://$BUCKET_NAME
 ```
 
-Configure static site:
+Configurar sitio estático:
 
-```bash
+``` bash
 gsutil web set -m index.html -e index.html gs://$BUCKET_NAME
 ```
 
-Allow public access:
+Permitir acceso público:
 
-```bash
+``` bash
 gsutil iam ch allUsers:objectViewer gs://$BUCKET_NAME
 ```
 
 ---
 
-## 📤 Step 9: Upload the frontend
+## 📤 Paso 9: Subir el frontend
 
-```bash
+``` bash
 gsutil cp index.html styles.css app.js gs://$BUCKET_NAME
 ```
 
 ---
 
-## 🌍 Step 10: Site URL
+## 🌍 Paso 10: URL del sitio
 
     http://storage.googleapis.com/<BUCKET_NAME>/index.html
 
 ---
 
-## 🧹 Step 11: Cleanup (optional)
+## 🧹 Paso 11: Limpieza (opcional)
 
-```bash
+``` bash
 gcloud functions delete $FUNCTION_NAME --region=$REGION --quiet
 gsutil rm -r gs://$BUCKET_NAME
 ```

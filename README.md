@@ -6,6 +6,8 @@ Este proyecto implementa un sistema simple para registrar notas utilizando servi
 
 ## 🧱 Arquitectura General
 
+![gcp notes app architecture](diagram/gcp-notes-architecture.png)
+
 **1. Base de datos NoSQL:**\
 Firestore en modo nativo, colección `notes`.
 

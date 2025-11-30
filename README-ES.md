@@ -2,16 +2,18 @@
 
 Este proyecto implementa un sistema simple para registrar notas utilizando servicios serverless de Google Cloud: Firestore, Cloud Functions y un frontend estático alojado en Cloud Storage.
 
+> Blog: [dev.to/chainiz](https://dev.to/chainiz/notes-webapp-complete-guide-with-cloud-functions-firestore-and-cloud-storage-3fcg)
+
 ---
 
 ## 🧱 Arquitectura General
 
 ![gcp notes app architecture](diagram/gcp-notes-architecture.png)
 
-**1. Base de datos NoSQL:**\
+**1. Base de datos NoSQL:**
 Firestore en modo nativo, colección `notes`.
 
-**2. Backend serverless:**\
+**2. Backend serverless:**
 Cloud Functions (Python) exponiendo un mini-API REST: 
 - `POST /notes` - crear nota
 - `GET /notes` - listar notas
@@ -19,7 +21,7 @@ Cloud Functions (Python) exponiendo un mini-API REST:
 - `PUT /notes/{id}` - actualizar nota
 - `DELETE /notes/{id}` - eliminar nota
 
-**3. Frontend:**\
+**3. Frontend:**
 Página web (HTML/CSS/JS) alojada como sitio estático en Cloud Storage.
 
 ---

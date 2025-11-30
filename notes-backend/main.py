@@ -1,3 +1,9 @@
+# -----------------------------------------------------------------------------
+# Author: Afu Tse
+# GitHub Repo: https://github.com/r3xakead0/gcp-notes-app-serverless
+# Description: Notes API with Firestore for Google Cloud Functions
+# -----------------------------------------------------------------------------
+
 import json
 import datetime
 from google.cloud import firestore
@@ -41,7 +47,7 @@ def notes_api(request):
         return (json.dumps({"error": "Not found"}), 404, headers)
 
     try:
-        # GET lista o detalle
+        # GET list or detail
         if method == "GET":
             if is_collection:
                 docs = (
@@ -57,7 +63,7 @@ def notes_api(request):
                     return (json.dumps({"error": "Note not found"}), 404, headers)
                 return (json.dumps(_note_to_dict(doc)), 200, headers)
 
-        # POST crear
+        # POST create
         if method == "POST" and is_collection:
             payload = request.get_json(silent=True)
             if not payload or "title" not in payload:
@@ -75,7 +81,7 @@ def notes_api(request):
 
             return (json.dumps(_note_to_dict(doc_ref.get())), 201, headers)
 
-        # PUT actualizar
+        # PUT update
         if method in ("PUT", "PATCH") and note_id:
             payload = request.get_json(silent=True)
             if not payload:
@@ -96,7 +102,7 @@ def notes_api(request):
             doc_ref.update(updates)
             return (json.dumps(_note_to_dict(doc_ref.get())), 200, headers)
 
-        # DELETE eliminar
+        # DELETE remove
         if method == "DELETE" and note_id:
             doc_ref = db.collection(NOTES_COLLECTION).document(note_id)
             if not doc_ref.get().exists:

@@ -1,4 +1,10 @@
-// URL base de la Cloud Function
+/* ---------------------------------------------------------------------
+ * Author: Afu Tse
+ * GitHub Repo: https://github.com/r3xakead0/gcp-notes-app-serverless
+ * Description: JavaScript for a frontend notes application
+ * -------------------------------------------------------------------*/
+
+// Base URL of the Cloud Function
 const API_BASE_URL = "https://notes-api-cinsoje5sq-uc.a.run.app";
 
 const form = document.getElementById("note-form");
@@ -35,12 +41,12 @@ function renderNotes(notes) {
     const tdActions = document.createElement("td");
 
     const editBtn = document.createElement("button");
-    editBtn.textContent = "Editar";
+    editBtn.textContent = "Edit";
     editBtn.className = "action-btn edit-btn";
     editBtn.onclick = () => loadNoteForEdit(note);
 
     const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Eliminar";
+    deleteBtn.textContent = "Delete";
     deleteBtn.className = "action-btn delete-btn";
     deleteBtn.onclick = () => deleteNote(note.id);
 
@@ -59,14 +65,14 @@ function resetForm() {
   noteIdInput.value = "";
   titleInput.value = "";
   detailInput.value = "";
-  formTitle.textContent = "Crear nota";
+  formTitle.textContent = "Create note";
 }
 
 function loadNoteForEdit(note) {
   noteIdInput.value = note.id;
   titleInput.value = note.title;
   detailInput.value = note.detail || "";
-  formTitle.textContent = "Editar nota";
+  formTitle.textContent = "Edit note";
 }
 
 async function saveNote(event) {
@@ -79,7 +85,7 @@ async function saveNote(event) {
   };
 
   if (!payload.title) {
-    alert("El título es obligatorio");
+    alert("Title is required");
     return;
   }
 
@@ -100,7 +106,7 @@ async function saveNote(event) {
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
     console.error("Error saving note:", error);
-    alert("Error guardando la nota");
+    alert("Error saving the note");
     return;
   }
 
@@ -109,7 +115,7 @@ async function saveNote(event) {
 }
 
 async function deleteNote(id) {
-  if (!confirm("¿Eliminar esta nota?")) return;
+  if (!confirm("Delete this note?")) return;
 
   const res = await fetch(`${API_BASE_URL}/notes/${id}`, {
     method: "DELETE",
@@ -117,7 +123,7 @@ async function deleteNote(id) {
 
   if (!res.ok) {
     console.error("Error deleting note");
-    alert("Error eliminando la nota");
+    alert("Error deleting the note");
     return;
   }
 

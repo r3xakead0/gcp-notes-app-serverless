@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "notes-backend/**"
+      - "notes-frontend/**"
   workflow_dispatch:
 
 permissions:
@@ -18,8 +21,30 @@ env:
   FRONTEND_DIR: notes-frontend
 
 jobs:
-  deploy:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed parts
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ github.token }}
+          filters: |
+            backend:
+              - 'notes-backend/**'
+            frontend:
+              - 'notes-frontend/**'
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,6 +70,25 @@ jobs:
             --entry-point=notes_api \
             --trigger-http \
             --allow-unauthenticated
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
 
       - name: Prepare frontend bucket
         run: |
